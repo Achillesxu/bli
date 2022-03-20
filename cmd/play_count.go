@@ -63,9 +63,9 @@ var playCountCmd = &cobra.Command{
 		pages, _ := b.Pages()
 		for _, u := range Urls {
 			pages.MustFindByURL(u).MustActivate()
-			time.Sleep(time.Second * 5)
+			time.Sleep(time.Second * 3)
 		}
 
-		time.Sleep(time.Second * 15)
+		time.Sleep(time.Second * 5)
 	},
 }
