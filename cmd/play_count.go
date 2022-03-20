@@ -43,7 +43,10 @@ var playCountCmd = &cobra.Command{
 			Path:   fmt.Sprintf("/%s", userIdFlag),
 		}
 		path, _ := launcher.LookPath()
-		u := launcher.New().Bin(path).Logger(pLog.Writer()).Headless(false).MustLaunch()
+		u := launcher.New().Bin(path).Logger(pLog.Writer()).
+			Headless(true).
+			Set("autoplay-policy", "no-user-gesture-required").
+			MustLaunch()
 		b := rod.New().ControlURL(u).MustConnect()
 		page := b.MustPage(url.String()).Context(cmd.Context())
 		page.MustWaitLoad()
@@ -58,13 +61,14 @@ var playCountCmd = &cobra.Command{
 			uStr := aid.MustProperty("href").String()
 			Urls = append(Urls, uStr)
 			b.MustPage(uStr).MustWaitLoad()
+			time.Sleep(time.Second * 2)
 			log.Infoln("play video: ", uStr)
 		}
-		pages, _ := b.Pages()
-		for _, u := range Urls {
-			pages.MustFindByURL(u).MustActivate()
-			time.Sleep(time.Second * 3)
-		}
+		// pages, _ := b.Pages()
+		// for _, u := range Urls {
+		// 	pages.MustFindByURL(u).MustActivate()
+		// 	time.Sleep(time.Second * 2)
+		// }
 
 		time.Sleep(time.Second * 5)
 	},
