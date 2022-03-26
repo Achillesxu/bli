@@ -49,10 +49,12 @@ var playCountCmd = &cobra.Command{
 		var browser *rod.Browser
 
 		if path, err := launcher.LookPath(); err != false {
-			u := launcher.New().Bin(path).Logger(pLog.Writer()).
-				Headless(isHeadless).
-				Set("autoplay-policy", "no-user-gesture-required").
-				MustLaunch()
+			l := launcher.New().Bin(path).Logger(pLog.Writer()).Set("autoplay-policy", "no-user-gesture-required")
+			if isHeadless {
+				l.Headless(isHeadless)
+				l.Set("disable-gpu", "true")
+			}
+			u := l.MustLaunch()
 			browser = rod.New().ControlURL(u).MustConnect()
 		} else {
 			pLog.Errorf("look path error: %v", err)
