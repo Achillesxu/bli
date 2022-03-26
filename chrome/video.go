@@ -167,6 +167,7 @@ func (pv *PlayVideo) PlayVideos(cmd *cobra.Command, b *rod.Browser) {
 			} else {
 				p.MustNavigate(vi.PlayUrl)
 				p.MustWaitLoad()
+				pv.Log.Infoln(pv.VInfoList[n].PlayUrl)
 				pv.VideoFastForward(p, n)
 			}
 		}
