@@ -50,7 +50,7 @@ var playCountCmd = &cobra.Command{
 
 		if path, err := launcher.LookPath(); err != false {
 			u := launcher.New().Bin(path).Logger(pLog.Writer()).
-				Headless(false).
+				Headless(isHeadless).
 				Set("autoplay-policy", "no-user-gesture-required").
 				MustLaunch()
 			browser = rod.New().ControlURL(u).MustConnect()
