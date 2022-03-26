@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Achillesxu/bli/chrome"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 	log "github.com/sirupsen/logrus"
@@ -16,13 +17,13 @@ import (
 
 var (
 	userIdFlag   string
-	videoCntFlag int
+	videoCntFlag int64
 )
 
 func init() {
 	rootCmd.AddCommand(playCountCmd)
 	playCountCmd.Flags().StringVarP(&userIdFlag, "user_id", "u", "94816944", "valid user id of bilibili (required)")
-	playCountCmd.Flags().IntVarP(&videoCntFlag, "video_count", "c", 10, "count of video to play ")
+	playCountCmd.Flags().Int64VarP(&videoCntFlag, "video_count", "c", 10, "count of the newest video to play")
 
 	_ = playCountCmd.MarkFlagRequired("user_id")
 }
@@ -30,46 +31,49 @@ func init() {
 var playCountCmd = &cobra.Command{
 	Use:   "play_count",
 	Short: "add video play count",
-	Long:  "go https://space.bilibili.com/${uid}, find all newest videos, then add play count",
+	Long:  "go https://space.bilibili.com/${uid}/video, find all newest videos, then add play count",
 	Run: func(cmd *cobra.Command, args []string) {
 		pLog := log.WithFields(log.Fields{
 			"user_id": userIdFlag,
 			"command": "play_count",
 		})
-		pLog.Infoln("start chrome to get newest videos list")
+
 		url := url.URL{
 			Scheme: "https",
 			Host:   "space.bilibili.com",
-			Path:   fmt.Sprintf("/%s", userIdFlag),
+			Path:   fmt.Sprintf("/%s/video", userIdFlag),
 		}
-		path, _ := launcher.LookPath()
-		u := launcher.New().Bin(path).Logger(pLog.Writer()).
-			Headless(true).
-			Set("autoplay-policy", "no-user-gesture-required").
-			MustLaunch()
-		b := rod.New().ControlURL(u).MustConnect()
-		page := b.MustPage(url.String()).Context(cmd.Context())
+
+		// l := launcher.NewManaged("")
+
+		var browser *rod.Browser
+
+		if path, err := launcher.LookPath(); err != false {
+			u := launcher.New().Bin(path).Logger(pLog.Writer()).
+				Headless(false).
+				Set("autoplay-policy", "no-user-gesture-required").
+				MustLaunch()
+			browser = rod.New().ControlURL(u).MustConnect()
+		} else {
+			pLog.Errorf("look path error: %v", err)
+			return
+		}
+		pLog.Infof("start chrome to get newest videos from %s", url.String())
+
+		page := browser.MustPage(url.String()).Context(cmd.Context())
 		page.MustWaitLoad()
-		dataAids := page.MustElementsX("//div/a[@href and @target='_blank' and @class='cover']")
+		time.Sleep(time.Second * 2)
 
-		Urls := make([]string, 1)
+		pv := chrome.NewPlayVideo(userIdFlag, videoCntFlag)
 
-		for n, aid := range dataAids {
-			if n > videoCntFlag {
-				break
-			}
-			uStr := aid.MustProperty("href").String()
-			Urls = append(Urls, uStr)
-			b.MustPage(uStr).MustWaitLoad()
-			time.Sleep(time.Second * 2)
-			log.Infoln("play video: ", uStr)
+		if err := pv.GetVideoInfoList(page); err != nil {
+			pLog.Errorf("get video info list error: %v", err)
+			return
+		} else {
+			pLog.Printf("get %d videos\n", len(pv.VInfoList))
 		}
-		// pages, _ := b.Pages()
-		// for _, u := range Urls {
-		// 	pages.MustFindByURL(u).MustActivate()
-		// 	time.Sleep(time.Second * 2)
-		// }
 
-		time.Sleep(time.Second * 5)
+		pv.PlayVideos(cmd, browser)
+
 	},
 }
