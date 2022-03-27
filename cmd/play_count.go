@@ -68,6 +68,8 @@ var playCountCmd = &cobra.Command{
 		}
 		pLog.Infof("start chrome to get newest videos from %s", url.String())
 
+		_ = browser.MustPage()
+
 		page := browser.MustPage(url.String()).Context(cmd.Context())
 		page.MustWaitLoad()
 		time.Sleep(time.Second * 2)

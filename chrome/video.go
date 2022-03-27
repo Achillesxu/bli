@@ -185,8 +185,8 @@ func (pv *PlayVideo) PlayVideos(cmd *cobra.Command, b *rod.Browser) {
 				pv.Log.Infoln(pv.VInfoList[n].Title)
 				pv.Log.Infoln(pv.VInfoList[n].PlayUrl)
 				pv.VideoFastForward(p, n)
-				p.MustClose()
 			}
 		}
+		p.MustClose()
 	}
 }
