@@ -57,7 +57,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.bli.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&isDebug, "debug", false, "Output verbose debug information")
-	rootCmd.PersistentFlags().BoolVar(&isHeadless, "headless", false, "set headless mode, default value is true that means no gui")
+	rootCmd.PersistentFlags().BoolVar(&isHeadless, "headless", true, "set headless mode, default value is true that means no gui")
 	rootCmd.PersistentFlags().StringVar(&remoteWs, "remote-ws", "", "remote websocket address from docker container")
 
 	// Cobra also supports local flags, which will only run

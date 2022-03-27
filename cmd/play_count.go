@@ -55,8 +55,10 @@ var playCountCmd = &cobra.Command{
 				Set("autoplay-policy", "no-user-gesture-required").
 				Set("mute-audio")
 			if isHeadless {
-				l.Headless(isHeadless)
+				l.Headless(true)
 				l.Set("disable-gpu", "true")
+			} else {
+				l.Headless(false)
 			}
 			u := l.MustLaunch()
 			browser = rod.New().ControlURL(u).MustConnect()
