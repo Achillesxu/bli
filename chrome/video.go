@@ -154,6 +154,21 @@ func (pv *PlayVideo) VideoFastForward(p *rod.Page, n int) {
 	}
 }
 
+func (pv *PlayVideo) DisplayVideoInfo() {
+	pv.Log.Infoln("First page video as following:")
+	for n, vi := range pv.VInfoList {
+		pv.Log.Infoln("***************************start*************************")
+		pv.Log.Infoln("视频序号：", n)
+		pv.Log.Infoln("视频名称：", vi.Title)
+		pv.Log.Infoln("视频地址：", vi.PlayUrl)
+		pv.Log.Infoln("视频播放量：", vi.PlayCount)
+		pv.Log.Infoln("视频时长：", vi.Duration)
+		pv.Log.Infoln("视频封面：", vi.ImageUrl)
+		pv.Log.Infoln("***************************end***************************")
+		pv.Log.Infoln("")
+	}
+}
+
 func (pv *PlayVideo) PlayVideos(cmd *cobra.Command, b *rod.Browser) {
 	p := b.MustPage()
 
@@ -170,6 +185,7 @@ func (pv *PlayVideo) PlayVideos(cmd *cobra.Command, b *rod.Browser) {
 				pv.Log.Infoln(pv.VInfoList[n].Title)
 				pv.Log.Infoln(pv.VInfoList[n].PlayUrl)
 				pv.VideoFastForward(p, n)
+				p.MustClose()
 			}
 		}
 	}

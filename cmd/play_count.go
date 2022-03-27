@@ -16,14 +16,16 @@ import (
 )
 
 var (
-	userIdFlag   string
-	videoCntFlag int64
+	userIdFlag    string
+	videoCntFlag  int64
+	videoInfoFlag bool
 )
 
 func init() {
 	rootCmd.AddCommand(playCountCmd)
 	playCountCmd.Flags().StringVarP(&userIdFlag, "user_id", "u", "94816944", "valid user id of bilibili (required)")
 	playCountCmd.Flags().Int64VarP(&videoCntFlag, "video_count", "c", 10, "count of the newest video to play")
+	playCountCmd.Flags().BoolVarP(&videoInfoFlag, "video_info", "i", false, "list video info or play video")
 
 	_ = playCountCmd.MarkFlagRequired("user_id")
 }
@@ -49,7 +51,9 @@ var playCountCmd = &cobra.Command{
 		var browser *rod.Browser
 
 		if path, err := launcher.LookPath(); err != false {
-			l := launcher.New().Bin(path).Logger(pLog.Writer()).Set("autoplay-policy", "no-user-gesture-required")
+			l := launcher.New().Bin(path).Logger(pLog.Writer()).
+				Set("autoplay-policy", "no-user-gesture-required").
+				Set("mute-audio")
 			if isHeadless {
 				l.Headless(isHeadless)
 				l.Set("disable-gpu", "true")
@@ -75,7 +79,10 @@ var playCountCmd = &cobra.Command{
 			pLog.Printf("get %d videos\n", len(pv.VInfoList))
 		}
 
-		pv.PlayVideos(cmd, browser)
-
+		if videoInfoFlag {
+			pv.DisplayVideoInfo()
+		} else {
+			pv.PlayVideos(cmd, browser)
+		}
 	},
 }
