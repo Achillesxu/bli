@@ -1,2 +1,2 @@
 # bli
-rod control chrome for bilibili play count
+rod control chrome for bilibili app
